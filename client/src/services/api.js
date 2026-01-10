@@ -18,9 +18,10 @@ api.interceptors.request.use((config) => {
 });
 
 export const sendMessage = async (message) => {
-  const res = await api.post("/chat", { message });
+  const res = await api.post("/chat/message", { message });
   return res.data;
 };
+
 
 export default api;
 

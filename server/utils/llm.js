@@ -25,7 +25,7 @@ export const callLLM = async (input) => {
   // 1️⃣ ATTEMPT GEMINI
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash", // Updated to existing 2.0 version
+      model: "gemini-2.5-flash", // Updated to existing 2.0 version
     });
 
     const result = await model.generateContent(prompt);

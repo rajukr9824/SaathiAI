@@ -4,6 +4,7 @@ import { auth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", auth, chat);
+// POST /api/chat/message
+router.post("/message", auth, chat);
 
 export default router;
