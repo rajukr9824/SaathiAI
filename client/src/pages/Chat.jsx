@@ -6,12 +6,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
-
   const userId = localStorage.getItem("userId");
-
-  useEffect(() => {
-    localStorage.setItem("userId", userId);
-  }, [userId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,125 +14,69 @@ const Chat = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
     setMessages((prev) => [...prev, { role: "user", content: input }]);
     setInput("");
     setLoading(true);
-
     try {
       const res = await sendMessage({ userId, message: input });
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: res.reply },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: res.reply }]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Something went wrong." },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong." }]);
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen px-2 pt-14">
-      <div className="
-        w-full
-        max-w-xl
-        h-screen
-        sm:h-[80vh]
-        bg-slate-900
-        rounded-none
-        sm:rounded-2xl
-        shadow-2xl
-        flex
-        flex-col
-      ">
-
-        {/* Header */}
-        <div className="text-center border-b border-slate-800 bg-slate-950 py-3">
-          <h2 className="text-base sm:text-lg font-semibold tracking-wide text-green-400">
-            Saathi
-          </h2>
-          <p className="text-[11px] sm:text-xs text-slate-400">
-            Your thoughtful companion
-          </p>
+    <div className="flex justify-center h-full w-full p-0 sm:p-4">
+      <div className="w-full max-w-2xl bg-slate-900/50 flex flex-col sm:rounded-2xl sm:border sm:border-slate-800 shadow-2xl overflow-hidden">
+        
+        <div className="text-center border-b border-slate-800 bg-slate-950/50 py-3 shrink-0">
+          <h2 className="text-sm sm:text-base font-semibold text-green-400">Saathi</h2>
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest">AI Companion</p>
         </div>
 
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-3">
-
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
           {messages.map((m, i) => (
             <div
               key={i}
-              className={`
-                max-w-[85%] sm:max-w-[75%]
-                px-4 py-2
-                rounded-2xl
-                text-sm
-                leading-relaxed
-                shadow
-                ${
-                  m.role === "user"
-                    ? "ml-auto bg-linear-to-br from-cyan-400 to-indigo-500 text-slate-900"
-                    : "mr-auto bg-green-500/90 text-slate-900"
-                }
-              `}
+              className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                m.role === "user"
+                  ? "ml-auto bg-indigo-600 text-white rounded-tr-none"
+                  : "mr-auto bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700"
+              }`}
             >
               {m.content}
             </div>
           ))}
-
           {loading && (
-            <div className="text-xs text-slate-400 italic">
-              Saathi is typing…
+            <div className="flex items-center gap-2 text-[11px] text-slate-400 animate-pulse">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Saathi is thinking...
             </div>
           )}
-
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-slate-800 bg-slate-950">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type your message…"
-            className="
-              flex-1
-              bg-slate-900
-              border border-slate-600
-              rounded-xl
-              px-4 py-2
-              text-sm text-white
-              placeholder-slate-400
-              outline-none
-              focus:ring-2 focus:ring-white
-            "
-          />
-
-          <button
-            onClick={handleSend}
-            className="
-              px-4 sm:px-5
-              py-2
-              rounded-xl
-              font-medium
-              bg-linear-to-br from-cyan-400 to-indigo-500
-              text-slate-900
-              hover:opacity-90
-            "
-          >
-            Send
-          </button>
+        <div className="p-3 sm:p-4 bg-slate-950/80 border-t border-slate-800 shrink-0">
+          <div className="flex items-center gap-2 max-w-3xl mx-auto">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Type a message..."
+              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:ring-1 focus:ring-green-500/50"
+            />
+            <button
+              onClick={handleSend}
+              className="bg-green-500 hover:bg-green-400 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-xs transition-colors"
+            >
+              SEND
+            </button>
+          </div>
         </div>
-
       </div>
     </div>
   );
 };
 
 export default Chat;
-

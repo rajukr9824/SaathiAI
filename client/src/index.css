@@ -1,11 +1,5 @@
 @import "tailwindcss";
 
-@layer base {
-  html,
-  body {
-    @apply h-full overflow-hidden;
-  }
-}
 
 /* 🔹 Hide scrollbar but keep scrolling */
 @layer utilities {
@@ -18,6 +12,9 @@
   }
 }
 @layer base {
+   html, body {
+    height: 100%;
+  }
   button,
   a {
     cursor: pointer;

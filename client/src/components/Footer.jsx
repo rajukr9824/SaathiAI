@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
-    <footer className="h-10 flex items-center justify-center text-xs text-slate-400 bg-slate-950 border-t border-slate-800">
-      © {new Date().getFullYear()} Saathi • Your thoughtful companion
+    <footer className="h-10 shrink-0 flex items-center justify-center text-[10px] sm:text-xs text-slate-500 bg-slate-950 border-t border-slate-900 pb-[env(safe-area-inset-bottom)]">
+      © {new Date().getFullYear()} SAATHI • POWERED BY AI
     </footer>
   );
 };
