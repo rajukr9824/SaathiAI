@@ -8,16 +8,15 @@ import { callLLM } from "../utils/llm.js";
 
 export const chat = async (req, res) => {
   try {
-    // 🔐 userId now comes from JWT middleware
     const userId = req.userId;
     const { message } = req.body;
 
-// 🔒 strict validation
-if (typeof message !== "string" || !message.trim()) {
-  return res.status(400).json({
-    reply: "Message must be a non-empty string",
-  });
-}
+    // 🔒 strict validation
+    if (typeof message !== "string" || !message.trim()) {
+      return res.status(400).json({
+        reply: "Message must be a non-empty string",
+      });
+    }
 
     // 1️⃣ Fetch authenticated user
     const user = await User.findById(userId);
@@ -29,21 +28,23 @@ if (typeof message !== "string" || !message.trim()) {
     await Message.create({
       userId,
       role: "user",
-      content: message,
+      content: message.trim(),
     });
 
-    // 3️⃣ Extract memory BEFORE LLM
+    // 3️⃣ Extract SAFE memory only (no identity fields)
     const extracted = extractMemory(message);
 
-    if (extracted.name) user.name = extracted.name;
-
+    // ✅ Preferences (safe)
     if (extracted.preferences?.length) {
       user.preferences = [
         ...new Set([...(user.preferences || []), ...extracted.preferences]),
       ];
     }
 
-    if (extracted.mood) user.lastMood = extracted.mood;
+    // ✅ Mood (safe)
+    if (extracted.lastMood) {
+      user.lastMood = extracted.lastMood;
+    }
 
     await user.save();
 
@@ -79,13 +80,14 @@ if (typeof message !== "string" || !message.trim()) {
       .join("\n");
 
     const updatedMemory = await summarizeMemory(chatText, callLLM);
+
     user.memorySummary = updatedMemory;
     await user.save();
 
     // 9️⃣ Respond
     res.json({ reply });
   } catch (error) {
-    console.error("Chat Controller Error:", error.message);
+    console.error("Chat Controller Error:", error);
     res.status(500).json({
       reply: "Sorry, I’m having trouble responding right now.",
     });
