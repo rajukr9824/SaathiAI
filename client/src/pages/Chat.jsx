@@ -7,24 +7,44 @@ const Chat = () => {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
   const userId = localStorage.getItem("userId");
+const [provider, setProvider] = useState(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+
   const handleSend = async () => {
-    if (!input.trim()) return;
-    setMessages((prev) => [...prev, { role: "user", content: input }]);
-    setInput("");
-    setLoading(true);
-    try {
-      const res = await sendMessage({ userId, message: input });
-      setMessages((prev) => [...prev, { role: "assistant", content: res.reply }]);
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong." }]);
-    }
-    setLoading(false);
-  };
+  if (!input.trim()) return;
+
+  setMessages((prev) => [...prev, { role: "user", content: input }]);
+  setInput("");
+  setLoading(true);
+  setProvider(null);
+
+  try {
+    const res = await sendMessage({ userId, message: input });
+
+    setProvider(res.provider); // ✅ SET PROVIDER
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: res.reply,
+        provider: res.provider,
+      },
+    ]);
+  } catch {
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "Something went wrong." },
+    ]);
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <div className="flex justify-center h-full w-full p-0 sm:p-4">
@@ -50,11 +70,12 @@ const Chat = () => {
             </div>
           ))}
           {loading && (
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 animate-pulse">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-              Saathi is thinking...
-            </div>
-          )}
+  <div className="flex items-center gap-2 text-[11px] text-slate-400 animate-pulse">
+    <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+    Saathi is thinking{provider ? ` using ${provider}` : ""}...
+  </div>
+)}
+
           <div ref={bottomRef} />
         </div>
 
