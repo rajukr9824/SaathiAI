@@ -19,7 +19,7 @@ const Header = () => {
   return (
     <header className="h-14 shrink-0 flex items-center justify-between px-4 sm:px-6 bg-slate-950 border-b border-slate-800 z-50">
       <h1 className="text-base sm:text-lg font-semibold text-green-400">
-        Saathi
+        SaathiAI
       </h1>
 
       <div className="flex items-center gap-3 sm:gap-4">

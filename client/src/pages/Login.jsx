@@ -32,7 +32,7 @@ const Login = () => {
         className="w-full max-w-sm bg-slate-900 p-6 rounded-2xl shadow-xl"
       >
         <h2 className="text-xl font-semibold text-center text-green-400 mb-4">
-          Login to Saathi
+          Login to SaathiAI
         </h2>
 
         {error && (

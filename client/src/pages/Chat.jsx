@@ -31,8 +31,8 @@ const Chat = () => {
       <div className="w-full max-w-2xl bg-slate-900/50 flex flex-col sm:rounded-2xl sm:border sm:border-slate-800 shadow-2xl overflow-hidden">
         
         <div className="text-center border-b border-slate-800 bg-slate-950/50 py-3 shrink-0">
-          <h2 className="text-sm sm:text-base font-semibold text-green-400">Saathi</h2>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest">AI Companion</p>
+          <h2 className="text-sm sm:text-base font-semibold text-green-400">Welcome to SaathiAI</h2>
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest">Your Companion</p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
