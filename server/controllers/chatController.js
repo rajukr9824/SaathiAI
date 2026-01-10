@@ -11,51 +11,35 @@ export const chat = async (req, res) => {
     const userId = req.userId;
     const { message } = req.body;
 
-    // 🔒 strict validation
     if (typeof message !== "string" || !message.trim()) {
-      return res.status(400).json({
-        reply: "Message must be a non-empty string",
-      });
+      return res.status(400).json({ reply: "Message must be a non-empty string" });
     }
 
-    // 1️⃣ Fetch authenticated user
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ reply: "User not found" });
-    }
+    if (!user) return res.status(404).json({ reply: "User not found" });
 
-    // 2️⃣ Save user message
+    // Save user message
     await Message.create({
       userId,
       role: "user",
       content: message.trim(),
     });
 
-    // 3️⃣ Extract SAFE memory only (no identity fields)
+    // Memory Extraction & Updates
     const extracted = extractMemory(message);
-
-    // ✅ Preferences (safe)
     if (extracted.preferences?.length) {
-      user.preferences = [
-        ...new Set([...(user.preferences || []), ...extracted.preferences]),
-      ];
+      user.preferences = [...new Set([...(user.preferences || []), ...extracted.preferences])];
     }
-
-    // ✅ Mood (safe)
-    if (extracted.lastMood) {
-      user.lastMood = extracted.lastMood;
-    }
-
+    if (extracted.lastMood) user.lastMood = extracted.lastMood;
     await user.save();
 
-    // 4️⃣ Fetch recent messages
+    // Fetch history
     const recentMessages = await Message.find({ userId })
       .sort({ createdAt: -1 })
       .limit(6)
       .lean();
 
-    // 5️⃣ Build LLM prompt
-    const messages = [
+    const promptMessages = [
       { role: "system", content: systemPrompt },
       { role: "system", content: buildMemoryPrompt(user) },
       ...recentMessages.reverse().map((m) => ({
@@ -64,32 +48,33 @@ export const chat = async (req, res) => {
       })),
     ];
 
-    // 6️⃣ Get LLM reply
-    const reply = await callLLM(messages);
+    // CALL LLM (Get object with text and provider)
+    const { text, provider } = await callLLM(promptMessages);
 
-    // 7️⃣ Save assistant reply
+    // Save assistant reply
     await Message.create({
       userId,
       role: "assistant",
-      content: reply,
+      content: text,
     });
 
-    // 8️⃣ Update long-term memory summary
-    const chatText = recentMessages
-      .map((m) => `${m.role}: ${m.content}`)
-      .join("\n");
-
+    // Background memory summary update
+    const chatText = recentMessages.map((m) => `${m.role}: ${m.content}`).join("\n");
     const updatedMemory = await summarizeMemory(chatText, callLLM);
-
     user.memorySummary = updatedMemory;
     await user.save();
 
-    // 9️⃣ Respond
-    res.json({ reply });
+    // FINAL RESPONSE
+    res.json({ 
+      reply: text, 
+      provider: provider 
+    });
+
   } catch (error) {
     console.error("Chat Controller Error:", error);
     res.status(500).json({
       reply: "Sorry, I’m having trouble responding right now.",
+      provider: "Error"
     });
   }
 };
