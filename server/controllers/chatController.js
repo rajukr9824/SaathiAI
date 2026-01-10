@@ -16,24 +16,30 @@ export const chat = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ reply: "User not found" });
+    if (!user) {
+      return res.status(404).json({ reply: "User not found" });
+    }
 
-    // Save user message
+    // 1️⃣ Save user message
     await Message.create({
       userId,
       role: "user",
       content: message.trim(),
     });
 
-    // Memory Extraction & Updates
+    // 2️⃣ Extract & update lightweight memory
     const extracted = extractMemory(message);
     if (extracted.preferences?.length) {
-      user.preferences = [...new Set([...(user.preferences || []), ...extracted.preferences])];
+      user.preferences = [
+        ...new Set([...(user.preferences || []), ...extracted.preferences]),
+      ];
     }
-    if (extracted.lastMood) user.lastMood = extracted.lastMood;
+    if (extracted.lastMood) {
+      user.lastMood = extracted.lastMood;
+    }
     await user.save();
 
-    // Fetch history
+    // 3️⃣ Fetch recent history
     const recentMessages = await Message.find({ userId })
       .sort({ createdAt: -1 })
       .limit(6)
@@ -48,33 +54,46 @@ export const chat = async (req, res) => {
       })),
     ];
 
-    // CALL LLM (Get object with text and provider)
+    // 4️⃣ Call LLM (may fallback)
     const { text, provider } = await callLLM(promptMessages);
 
-    // Save assistant reply
+    // 5️⃣ Save assistant reply
     await Message.create({
       userId,
       role: "assistant",
       content: text,
     });
 
-    // Background memory summary update
-    const chatText = recentMessages.map((m) => `${m.role}: ${m.content}`).join("\n");
-    const updatedMemory = await summarizeMemory(chatText, callLLM);
-    user.memorySummary = updatedMemory;
-    await user.save();
+    // 6️⃣ Background memory summary (SAFE)
+    try {
+      const chatText = recentMessages
+        .map((m) => `${m.role}: ${m.content}`)
+        .join("\n");
 
-    // FINAL RESPONSE
-    res.json({ 
-      reply: text, 
-      provider: provider 
+      const updatedMemory = await summarizeMemory(chatText, callLLM);
+
+      // ✅ FIX: ensure memorySummary is ALWAYS a string
+      user.memorySummary =
+        typeof updatedMemory === "string"
+          ? updatedMemory
+          : updatedMemory?.text || user.memorySummary || "";
+
+      await user.save();
+    } catch (memErr) {
+      console.error("Memory update failed:", memErr.message);
+      // ❗ Do NOT crash chat for memory issues
+    }
+
+    // 7️⃣ Final response
+    res.json({
+      reply: text,
+      provider,
     });
-
   } catch (error) {
     console.error("Chat Controller Error:", error);
     res.status(500).json({
       reply: "Sorry, I’m having trouble responding right now.",
-      provider: "Error"
+      provider: "Error",
     });
   }
 };
