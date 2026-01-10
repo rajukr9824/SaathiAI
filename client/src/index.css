@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body {
+    @apply h-full overflow-hidden;
+  }
+}
+
+/* 🔹 Hide scrollbar but keep scrolling */
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE & Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;            /* Chrome, Safari */
+  }
+}
+@layer base {
+  button,
+  a {
+    cursor: pointer;
+  }
+}
