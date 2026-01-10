@@ -2,14 +2,14 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
+
 import chatRoutes from "./routes/chatRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
 const app = express();
-const __dirname = path.resolve();
+
 
 /* ---------- Middlewares ---------- */
 app.use(express.json());
@@ -27,13 +27,7 @@ app.use("/api/chat", chatRoutes);
 
 
 
-/* ---------- Serve Vite Frontend ---------- */
-const clientDistPath = path.join(__dirname, "../client/dist");
-app.use(express.static(clientDistPath));
-/* ---------- React Router Catch-all (LAST) ---------- */
-app.get(/^(?!\/api).*/, (req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
+
 
 /* ---------- MongoDB ---------- */
 mongoose
