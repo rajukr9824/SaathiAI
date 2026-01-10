@@ -1,7 +1,11 @@
+
+
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api` || "http://localhost:5000/api",
+  baseURL: `${API_URL}/api`,
 });
 
 // attach JWT automatically
@@ -14,15 +18,11 @@ api.interceptors.request.use((config) => {
 });
 
 export const sendMessage = async (message) => {
-  // 🔒 ensure message is always a string
-  const safeMessage =
-    typeof message === "string" ? message : JSON.stringify(message ?? "");
-
-  const res = await api.post("/chat", {
-    message: safeMessage,
-  });
-
+  const res = await api.post("/chat", { message });
   return res.data;
 };
 
 export default api;
+
+
+

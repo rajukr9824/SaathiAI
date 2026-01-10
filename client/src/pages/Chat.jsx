@@ -14,7 +14,7 @@ const [provider, setProvider] = useState(null);
   }, [messages, loading]);
 
 
-  const handleSend = async () => {
+ const handleSend = async () => {
   if (!input.trim()) return;
 
   setMessages((prev) => [...prev, { role: "user", content: input }]);
@@ -23,9 +23,9 @@ const [provider, setProvider] = useState(null);
   setProvider(null);
 
   try {
-    const res = await sendMessage({ userId, message: input });
+    const res = await sendMessage(input); // ✅ FIXED
 
-    setProvider(res.provider); // ✅ SET PROVIDER
+    setProvider(res.provider);
 
     setMessages((prev) => [
       ...prev,
@@ -35,15 +35,20 @@ const [provider, setProvider] = useState(null);
         provider: res.provider,
       },
     ]);
-  } catch {
+  } catch (err) {
+    console.error(err);
     setMessages((prev) => [
       ...prev,
-      { role: "assistant", content: "Something went wrong." },
+      {
+        role: "assistant",
+        content: "Server not reachable. Please try again.",
+      },
     ]);
+  } finally {
+    setLoading(false); // ✅ ALWAYS stops thinking
   }
-
-  setLoading(false);
 };
+
 
 
   return (
