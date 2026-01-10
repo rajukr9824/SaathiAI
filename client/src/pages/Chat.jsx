@@ -35,7 +35,8 @@ const Chat = () => {
           <p className="text-[10px] text-slate-500 uppercase tracking-widest">Your Companion</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
+        {/* Updated className below to hide scrollbar */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {messages.map((m, i) => (
             <div
               key={i}
